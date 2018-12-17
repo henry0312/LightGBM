@@ -1528,7 +1528,6 @@ class Booster(object):
             # buffer for inner predict
             self.__inner_predict_buffer = [None]
             self.__is_predicted_cur_iter = [False]
-            self.__get_eval_info()
             self.pandas_categorical = train_set.pandas_categorical
         elif model_file is not None:
             # Prediction task

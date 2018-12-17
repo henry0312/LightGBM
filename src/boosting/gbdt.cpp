@@ -537,14 +537,7 @@ std::string GBDT::OutputMetric(int iter) {
 std::vector<double> GBDT::GetEvalAt(int data_idx) const {
   CHECK(data_idx >= 0 && data_idx <= static_cast<int>(valid_score_updater_.size()));
   std::vector<double> ret;
-  if (data_idx == 0) {
-    for (auto& sub_metric : training_metrics_) {
-      auto scores = EvalOneMetric(sub_metric, train_score_updater_->score());
-      for (auto score : scores) {
-        ret.push_back(score);
-      }
-    }
-  } else {
+  if (data_idx > 0) {
     auto used_idx = data_idx - 1;
     for (size_t j = 0; j < valid_metrics_[used_idx].size(); ++j) {
       auto test_scores = EvalOneMetric(valid_metrics_[used_idx][j], valid_score_updater_[used_idx]->score());

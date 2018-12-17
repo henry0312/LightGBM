@@ -100,17 +100,6 @@ public:
     if (objective_fun_ != nullptr) {
       objective_fun_->Init(train_data_->metadata(), train_data_->num_data());
     }
-
-    // create training metric
-    train_metric_.clear();
-    for (auto metric_type : config_.metric) {
-      auto metric = std::unique_ptr<Metric>(
-        Metric::CreateMetric(metric_type, config_));
-      if (metric == nullptr) { continue; }
-      metric->Init(train_data_->metadata(), train_data_->num_data());
-      train_metric_.push_back(std::move(metric));
-    }
-    train_metric_.shrink_to_fit();
   }
 
   void ResetTrainingData(const Dataset* train_data) {
@@ -299,18 +288,23 @@ public:
 
   int GetEvalCounts() const {
     int ret = 0;
-    for (const auto& metric : train_metric_) {
-      ret += static_cast<int>(metric->GetName().size());
+    for (size_t i = 0; i < valid_metrics_.size(); ++i) {
+      for (size_t j = 0; j < valid_metrics_[i].size(); ++j) {
+        ret += static_cast<int>(valid_metrics_[i][j]->GetName().size());
+      }
     }
     return ret;
   }
 
   int GetEvalNames(char** out_strs) const {
     int idx = 0;
-    for (const auto& metric : train_metric_) {
-      for (const auto& name : metric->GetName()) {
-        std::memcpy(out_strs[idx], name.c_str(), name.size() + 1);
-        ++idx;
+    for (size_t i = 0; i < valid_metrics_.size(); ++i) {
+      for (size_t j = 0; j < valid_metrics_[i].size(); ++j) {
+          auto& metric = valid_metrics_[i][j];
+          for (const auto& name : metric->GetName()) {
+            std::memcpy(out_strs[idx], name.c_str(), name.size() + 1);
+            ++idx;
+          }
       }
     }
     return idx;
